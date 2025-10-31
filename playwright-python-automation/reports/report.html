@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title id="head-title">report.html</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">report.html</h1>
+    <p>Report generated on 31-Oct-2025 at 05:48:19 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.1.1</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="4">No results found. Check the filters.</th>
+        </tr>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="4">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left"><</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">></div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">28 tests took 00:00:15.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" />
+            <span class="failed">3 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" />
+            <span class="passed">25 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled/>
+            <span class="skipped">0 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" disabled/>
+            <span class="xfailed">0 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" disabled/>
+            <span class="xpassed">0 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled/>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled/>
+            <span class="rerun">0 Reruns</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th>Links</th>
+        </tr>
+      </thead>
+    </table>
+  </body>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.9.6&#34;, &#34;Platform&#34;: &#34;macOS-15.6.1-arm64-arm-64bit&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;8.3.2&#34;, &#34;pluggy&#34;: &#34;1.6.0&#34;}, &#34;Plugins&#34;: {&#34;html&#34;: &#34;4.1.1&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;, &#34;base-url&#34;: &#34;2.1.0&#34;, &#34;Faker&#34;: &#34;37.12.0&#34;, &#34;playwright&#34;: &#34;0.7.1&#34;, &#34;xdist&#34;: &#34;3.6.1&#34;}, &#34;Base URL&#34;: &#34;&#34;}, &#34;tests&#34;: {&#34;tests/api/test_transaction_API.py::TestUserApi::test_get_transaction_by_userid&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_transaction_API.py::TestUserApi::test_get_transaction_by_userid&#34;, &#34;duration&#34;: &#34;108 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_transaction_API.py::TestUserApi::test_get_transaction_by_userid&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;108 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Emily Suarez&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;shoffman@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;}\ntransaction_config.json\n/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/resources\n/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/resources/transaction_config.json\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:04 [INFO] test_transaction_API: b869af30-4c91-49ff-b21b-41729da76f80\n2025-10-31 05:48:04 [INFO] test_transaction_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Emily Suarez&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;shoffman@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;7893de6f-7e0d-4929-9a93-fbbc187ca6e3&amp;#x27;}\n2025-10-31 05:48:04 [INFO] src.utils.ApiMock:  self._transactiondata[data[&amp;#x27;user_id&amp;#x27;]]  [&amp;#x27;a48b00c1-4cc1-4119-8301-9bbe89dd4e1d&amp;#x27;]\n2025-10-31 05:48:04 [INFO] test_transaction_API: 201\n2025-10-31 05:48:04 [INFO] test_transaction_API: {&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;99e47151-b5a4-4f2b-854d-9ad0cc313f17&amp;#x27;, &amp;#x27;amount&amp;#x27;: 12.79, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:04.609123&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;a48b00c1-4cc1-4119-8301-9bbe89dd4e1d&amp;#x27;}\n2025-10-31 05:48:04 [INFO] src.utils.ApiMock: &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\n2025-10-31 05:48:04 [INFO] src.utils.ApiMock: A0001\n2025-10-31 05:48:04 [INFO] src.utils.ApiMock:  self._transactiondata[entity_id] A0001 [&amp;#x27;a48b00c1-4cc1-4119-8301-9bbe89dd4e1d&amp;#x27;]\n2025-10-31 05:48:04 [INFO] src.utils.ApiMock:  entity  [{&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;99e47151-b5a4-4f2b-854d-9ad0cc313f17&amp;#x27;, &amp;#x27;amount&amp;#x27;: 12.79, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:04.609123&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;a48b00c1-4cc1-4119-8301-9bbe89dd4e1d&amp;#x27;}]\n2025-10-31 05:48:04 [INFO] test_transaction_API: 200\n2025-10-31 05:48:04 [INFO] test_transaction_API: [{&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;99e47151-b5a4-4f2b-854d-9ad0cc313f17&amp;#x27;, &amp;#x27;amount&amp;#x27;: 12.79, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:04.609123&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;a48b00c1-4cc1-4119-8301-9bbe89dd4e1d&amp;#x27;}]\n2025-10-31 05:48:04 [INFO] src.utils.DataAccessCompare: &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\n2025-10-31 05:48:04 [INFO] src.utils.DataAccessCompare: &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\n2025-10-31 05:48:04 [INFO] src.utils.DataAccessCompare: user_id\n2025-10-31 05:48:04 [INFO] src.utils.DataAccessCompare: amount\n2025-10-31 05:48:04 [INFO] src.utils.DataAccessCompare: type\n2025-10-31 05:48:04 [INFO] src.utils.DataAccessCompare: recipient_id\n\n------------------------------ Captured log call -------------------------------\nINFO     test_transaction_API:test_transaction_API.py:41 b869af30-4c91-49ff-b21b-41729da76f80\nINFO     test_transaction_API:test_transaction_API.py:44 {&amp;#x27;name&amp;#x27;: &amp;#x27;Emily Suarez&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;shoffman@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;7893de6f-7e0d-4929-9a93-fbbc187ca6e3&amp;#x27;}\nINFO     src.utils.ApiMock:ApiMock.py:69  self._transactiondata[data[&amp;#x27;user_id&amp;#x27;]]  [&amp;#x27;a48b00c1-4cc1-4119-8301-9bbe89dd4e1d&amp;#x27;]\nINFO     test_transaction_API:test_transaction_API.py:50 201\nINFO     test_transaction_API:test_transaction_API.py:51 {&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;99e47151-b5a4-4f2b-854d-9ad0cc313f17&amp;#x27;, &amp;#x27;amount&amp;#x27;: 12.79, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:04.609123&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;a48b00c1-4cc1-4119-8301-9bbe89dd4e1d&amp;#x27;}\nINFO     src.utils.ApiMock:ApiMock.py:88 &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\nINFO     src.utils.ApiMock:ApiMock.py:89 A0001\nINFO     src.utils.ApiMock:ApiMock.py:97  self._transactiondata[entity_id] A0001 [&amp;#x27;a48b00c1-4cc1-4119-8301-9bbe89dd4e1d&amp;#x27;]\nINFO     src.utils.ApiMock:ApiMock.py:101  entity  [{&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;99e47151-b5a4-4f2b-854d-9ad0cc313f17&amp;#x27;, &amp;#x27;amount&amp;#x27;: 12.79, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:04.609123&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;a48b00c1-4cc1-4119-8301-9bbe89dd4e1d&amp;#x27;}]\nINFO     test_transaction_API:test_transaction_API.py:56 200\nINFO     test_transaction_API:test_transaction_API.py:57 [{&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;99e47151-b5a4-4f2b-854d-9ad0cc313f17&amp;#x27;, &amp;#x27;amount&amp;#x27;: 12.79, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:04.609123&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;a48b00c1-4cc1-4119-8301-9bbe89dd4e1d&amp;#x27;}]\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:65 &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:66 &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 user_id\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 amount\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 type\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 recipient_id\n\n&#34;}], &#34;tests/api/test_transaction_API.py::TestUserApi::test_create_transaction&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_transaction_API.py::TestUserApi::test_create_transaction&#34;, &#34;duration&#34;: &#34;101 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_transaction_API.py::TestUserApi::test_create_transaction&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;101 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Shannon Gomez&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;jane92@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;}\ntransaction_config.json\n/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/resources\n/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/resources/transaction_config.json\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:04 [INFO] test_transaction_API: e0a6bb15-7cc2-4c16-a92f-d04b22e62859\n2025-10-31 05:48:04 [INFO] test_transaction_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Shannon Gomez&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;jane92@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;82a11550-d3e0-440a-a450-04bef544db54&amp;#x27;}\n2025-10-31 05:48:04 [INFO] src.utils.ApiMock:  self._transactiondata[data[&amp;#x27;user_id&amp;#x27;]]  [&amp;#x27;646509a9-1c14-422d-8187-a232facdd584&amp;#x27;]\n2025-10-31 05:48:04 [INFO] test_transaction_API: 201\n2025-10-31 05:48:04 [INFO] test_transaction_API: {&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0002&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;9405b87b-003e-41cf-9f47-dc5eca743915&amp;#x27;, &amp;#x27;amount&amp;#x27;: 873.24, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:04.713868&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;646509a9-1c14-422d-8187-a232facdd584&amp;#x27;}\n2025-10-31 05:48:04 [INFO] src.utils.DataAccessCompare: &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\n2025-10-31 05:48:04 [INFO] src.utils.DataAccessCompare: &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\n2025-10-31 05:48:04 [INFO] src.utils.DataAccessCompare: user_id\n2025-10-31 05:48:04 [INFO] src.utils.DataAccessCompare: amount\n2025-10-31 05:48:04 [INFO] src.utils.DataAccessCompare: type\n2025-10-31 05:48:04 [INFO] src.utils.DataAccessCompare: recipient_id\n\n------------------------------ Captured log call -------------------------------\nINFO     test_transaction_API:test_transaction_API.py:77 e0a6bb15-7cc2-4c16-a92f-d04b22e62859\nINFO     test_transaction_API:test_transaction_API.py:80 {&amp;#x27;name&amp;#x27;: &amp;#x27;Shannon Gomez&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;jane92@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;82a11550-d3e0-440a-a450-04bef544db54&amp;#x27;}\nINFO     src.utils.ApiMock:ApiMock.py:69  self._transactiondata[data[&amp;#x27;user_id&amp;#x27;]]  [&amp;#x27;646509a9-1c14-422d-8187-a232facdd584&amp;#x27;]\nINFO     test_transaction_API:test_transaction_API.py:86 201\nINFO     test_transaction_API:test_transaction_API.py:87 {&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0002&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;9405b87b-003e-41cf-9f47-dc5eca743915&amp;#x27;, &amp;#x27;amount&amp;#x27;: 873.24, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:04.713868&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;646509a9-1c14-422d-8187-a232facdd584&amp;#x27;}\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:65 &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:66 &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 user_id\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 amount\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 type\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 recipient_id\n\n&#34;}], &#34;tests/api/test_transaction_API.py::TestUserApi::test_create_transaction_authentication_invalidtoken&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_transaction_API.py::TestUserApi::test_create_transaction_authentication_invalidtoken&#34;, &#34;duration&#34;: &#34;101 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_transaction_API.py::TestUserApi::test_create_transaction_authentication_invalidtoken&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;101 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Pamela Ross&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;randall46@example.net&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;}\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:04 [INFO] test_transaction_API: bc63a64b-ba0a-4ae4-b5d6-23dbaa156229\n2025-10-31 05:48:04 [INFO] test_transaction_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Pamela Ross&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;randall46@example.net&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;d4b2e7d7-4fc2-43ea-b956-07b999b097c6&amp;#x27;}\n2025-10-31 05:48:04 [INFO] test_transaction_API: 401\n2025-10-31 05:48:04 [INFO] test_transaction_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;Unauthorized&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_transaction_API:test_transaction_API.py:109 bc63a64b-ba0a-4ae4-b5d6-23dbaa156229\nINFO     test_transaction_API:test_transaction_API.py:112 {&amp;#x27;name&amp;#x27;: &amp;#x27;Pamela Ross&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;randall46@example.net&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;d4b2e7d7-4fc2-43ea-b956-07b999b097c6&amp;#x27;}\nINFO     test_transaction_API:test_transaction_API.py:118 401\nINFO     test_transaction_API:test_transaction_API.py:119 {&amp;#x27;error&amp;#x27;: &amp;#x27;Unauthorized&amp;#x27;}\n\n&#34;}], &#34;tests/api/test_transaction_API.py::TestUserApi::test_get_transactions_not_exists&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_transaction_API.py::TestUserApi::test_get_transactions_not_exists&#34;, &#34;duration&#34;: &#34;101 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_transaction_API.py::TestUserApi::test_get_transactions_not_exists&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;101 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Nicole Contreras&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;dustinwatson@example.net&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;}\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:04 [INFO] test_transaction_API: 05a576ab-6281-426f-a187-0e500d3cbabc\n2025-10-31 05:48:04 [INFO] test_transaction_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Nicole Contreras&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;dustinwatson@example.net&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;d195bf58-8e5a-4092-9e68-ad9fb06e9f18&amp;#x27;}\n2025-10-31 05:48:04 [INFO] src.utils.ApiMock: &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\n2025-10-31 05:48:04 [INFO] src.utils.ApiMock: A0001\n2025-10-31 05:48:04 [INFO] src.utils.ApiMock:  self._transactiondata[entity_id] A001 []\n2025-10-31 05:48:04 [INFO] src.utils.ApiMock:  entity  []\n2025-10-31 05:48:04 [INFO] test_transaction_API: 404\n2025-10-31 05:48:04 [INFO] test_transaction_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;transaction not found&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_transaction_API:test_transaction_API.py:140 05a576ab-6281-426f-a187-0e500d3cbabc\nINFO     test_transaction_API:test_transaction_API.py:143 {&amp;#x27;name&amp;#x27;: &amp;#x27;Nicole Contreras&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;dustinwatson@example.net&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;d195bf58-8e5a-4092-9e68-ad9fb06e9f18&amp;#x27;}\nINFO     src.utils.ApiMock:ApiMock.py:88 &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\nINFO     src.utils.ApiMock:ApiMock.py:89 A0001\nINFO     src.utils.ApiMock:ApiMock.py:97  self._transactiondata[entity_id] A001 []\nINFO     src.utils.ApiMock:ApiMock.py:101  entity  []\nINFO     test_transaction_API:test_transaction_API.py:147 404\nINFO     test_transaction_API:test_transaction_API.py:148 {&amp;#x27;error&amp;#x27;: &amp;#x27;transaction not found&amp;#x27;}\n\n&#34;}], &#34;tests/api/test_transaction_API.py::TestUserApi::test_auth_transactions_insuffient_permission&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_transaction_API.py::TestUserApi::test_auth_transactions_insuffient_permission&#34;, &#34;duration&#34;: &#34;101 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_transaction_API.py::TestUserApi::test_auth_transactions_insuffient_permission&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;101 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Sarah King&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;walteranthony@example.net&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;}\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:05 [INFO] test_transaction_API: 4b732086-ec15-45ab-bfeb-f00ad47a843e\n2025-10-31 05:48:05 [INFO] test_transaction_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Sarah King&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;walteranthony@example.net&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;7829d3c6-5c74-4813-8ef2-c1df130f2416&amp;#x27;}\n2025-10-31 05:48:05 [INFO] test_transaction_API: 403\n2025-10-31 05:48:05 [INFO] test_transaction_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;Access denied&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_transaction_API:test_transaction_API.py:178 4b732086-ec15-45ab-bfeb-f00ad47a843e\nINFO     test_transaction_API:test_transaction_API.py:181 {&amp;#x27;name&amp;#x27;: &amp;#x27;Sarah King&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;walteranthony@example.net&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;7829d3c6-5c74-4813-8ef2-c1df130f2416&amp;#x27;}\nINFO     test_transaction_API:test_transaction_API.py:185 403\nINFO     test_transaction_API:test_transaction_API.py:186 {&amp;#x27;error&amp;#x27;: &amp;#x27;Access denied&amp;#x27;}\n\n&#34;}], &#34;tests/api/test_transaction_API.py::TestUserApi::test_user_detail_data_validation&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_transaction_API.py::TestUserApi::test_user_detail_data_validation&#34;, &#34;duration&#34;: &#34;102 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_transaction_API.py::TestUserApi::test_user_detail_data_validation&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;102 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Tammy Burgess&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;joshua24@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;}\ntransaction_config.json\n/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/resources\n/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/resources/transaction_config.json\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:05 [INFO] test_transaction_API: a9160dc1-cdad-428f-99d3-27e7f27dc0fa\n2025-10-31 05:48:05 [INFO] test_transaction_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Tammy Burgess&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;joshua24@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;ba9cdfe9-aa80-403e-8746-846c5c411b2a&amp;#x27;}\n2025-10-31 05:48:05 [INFO] src.utils.ApiMock:  self._transactiondata[data[&amp;#x27;user_id&amp;#x27;]]  [&amp;#x27;417285c8-e0cc-4a12-9d85-c80d8a64bda9&amp;#x27;]\n2025-10-31 05:48:05 [INFO] test_transaction_API: 201\n2025-10-31 05:48:05 [INFO] test_transaction_API: {&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;2bd40bc3-e810-47b7-a9fe-42591b9efe02&amp;#x27;, &amp;#x27;amount&amp;#x27;: 519.93, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:05.120869&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;417285c8-e0cc-4a12-9d85-c80d8a64bda9&amp;#x27;}\n2025-10-31 05:48:05 [INFO] src.utils.ApiMock: &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\n2025-10-31 05:48:05 [INFO] src.utils.ApiMock: A0001\n2025-10-31 05:48:05 [INFO] src.utils.ApiMock:  self._transactiondata[entity_id] A0001 [&amp;#x27;417285c8-e0cc-4a12-9d85-c80d8a64bda9&amp;#x27;]\n2025-10-31 05:48:05 [INFO] src.utils.ApiMock:  entity  [{&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;2bd40bc3-e810-47b7-a9fe-42591b9efe02&amp;#x27;, &amp;#x27;amount&amp;#x27;: 519.93, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:05.120869&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;417285c8-e0cc-4a12-9d85-c80d8a64bda9&amp;#x27;}]\n2025-10-31 05:48:05 [INFO] test_transaction_API: 200\n2025-10-31 05:48:05 [INFO] test_transaction_API: [{&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;2bd40bc3-e810-47b7-a9fe-42591b9efe02&amp;#x27;, &amp;#x27;amount&amp;#x27;: 519.93, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:05.120869&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;417285c8-e0cc-4a12-9d85-c80d8a64bda9&amp;#x27;}]\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: user_id\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: amount\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: type\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: recipient_id\n\n------------------------------ Captured log call -------------------------------\nINFO     test_transaction_API:test_transaction_API.py:205 a9160dc1-cdad-428f-99d3-27e7f27dc0fa\nINFO     test_transaction_API:test_transaction_API.py:208 {&amp;#x27;name&amp;#x27;: &amp;#x27;Tammy Burgess&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;joshua24@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;ba9cdfe9-aa80-403e-8746-846c5c411b2a&amp;#x27;}\nINFO     src.utils.ApiMock:ApiMock.py:69  self._transactiondata[data[&amp;#x27;user_id&amp;#x27;]]  [&amp;#x27;417285c8-e0cc-4a12-9d85-c80d8a64bda9&amp;#x27;]\nINFO     test_transaction_API:test_transaction_API.py:214 201\nINFO     test_transaction_API:test_transaction_API.py:215 {&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;2bd40bc3-e810-47b7-a9fe-42591b9efe02&amp;#x27;, &amp;#x27;amount&amp;#x27;: 519.93, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:05.120869&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;417285c8-e0cc-4a12-9d85-c80d8a64bda9&amp;#x27;}\nINFO     src.utils.ApiMock:ApiMock.py:88 &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\nINFO     src.utils.ApiMock:ApiMock.py:89 A0001\nINFO     src.utils.ApiMock:ApiMock.py:97  self._transactiondata[entity_id] A0001 [&amp;#x27;417285c8-e0cc-4a12-9d85-c80d8a64bda9&amp;#x27;]\nINFO     src.utils.ApiMock:ApiMock.py:101  entity  [{&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;2bd40bc3-e810-47b7-a9fe-42591b9efe02&amp;#x27;, &amp;#x27;amount&amp;#x27;: 519.93, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:05.120869&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;417285c8-e0cc-4a12-9d85-c80d8a64bda9&amp;#x27;}]\nINFO     test_transaction_API:test_transaction_API.py:220 200\nINFO     test_transaction_API:test_transaction_API.py:221 [{&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;2bd40bc3-e810-47b7-a9fe-42591b9efe02&amp;#x27;, &amp;#x27;amount&amp;#x27;: 519.93, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:05.120869&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;417285c8-e0cc-4a12-9d85-c80d8a64bda9&amp;#x27;}]\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:65 &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:66 &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 user_id\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 amount\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 type\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 recipient_id\n\n&#34;}], &#34;tests/api/test_transaction_API.py::TestUserApi::test_create_transaction_empty_userid&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_transaction_API.py::TestUserApi::test_create_transaction_empty_userid&#34;, &#34;duration&#34;: &#34;101 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_transaction_API.py::TestUserApi::test_create_transaction_empty_userid&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;101 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Gregory Henry&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;jeffreykim@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;}\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:05 [INFO] test_transaction_API: 9be12567-cfe6-4fcb-85ce-0657c2ed8e82\n2025-10-31 05:48:05 [INFO] test_transaction_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Gregory Henry&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;jeffreykim@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;f4f4a4b4-3191-4425-8708-8077d0579037&amp;#x27;}\n2025-10-31 05:48:05 [INFO] test_transaction_API: 400\n2025-10-31 05:48:05 [INFO] test_transaction_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;Missing field&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_transaction_API:test_transaction_API.py:241 9be12567-cfe6-4fcb-85ce-0657c2ed8e82\nINFO     test_transaction_API:test_transaction_API.py:244 {&amp;#x27;name&amp;#x27;: &amp;#x27;Gregory Henry&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;jeffreykim@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;f4f4a4b4-3191-4425-8708-8077d0579037&amp;#x27;}\nINFO     test_transaction_API:test_transaction_API.py:251 400\nINFO     test_transaction_API:test_transaction_API.py:252 {&amp;#x27;error&amp;#x27;: &amp;#x27;Missing field&amp;#x27;}\n\n&#34;}], &#34;tests/api/test_transaction_API.py::TestUserApi::test_create_transactionid_empty_receipient_id&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_transaction_API.py::TestUserApi::test_create_transactionid_empty_receipient_id&#34;, &#34;duration&#34;: &#34;101 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_transaction_API.py::TestUserApi::test_create_transactionid_empty_receipient_id&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;101 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Brittany Lane&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;ahudson@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;}\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:05 [INFO] test_transaction_API: 9259ebe3-72e4-4cf1-949a-14929b2b4973\n2025-10-31 05:48:05 [INFO] test_transaction_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Brittany Lane&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;ahudson@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;d7cee3ab-07e9-4be9-90c2-9003988523ef&amp;#x27;}\n2025-10-31 05:48:05 [INFO] test_transaction_API: 400\n2025-10-31 05:48:05 [INFO] test_transaction_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;Missing field&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_transaction_API:test_transaction_API.py:270 9259ebe3-72e4-4cf1-949a-14929b2b4973\nINFO     test_transaction_API:test_transaction_API.py:273 {&amp;#x27;name&amp;#x27;: &amp;#x27;Brittany Lane&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;ahudson@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;d7cee3ab-07e9-4be9-90c2-9003988523ef&amp;#x27;}\nINFO     test_transaction_API:test_transaction_API.py:280 400\nINFO     test_transaction_API:test_transaction_API.py:281 {&amp;#x27;error&amp;#x27;: &amp;#x27;Missing field&amp;#x27;}\n\n&#34;}], &#34;tests/api/test_transaction_API.py::TestUserApi::test_create_transaction_id_invalid_amount&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_transaction_API.py::TestUserApi::test_create_transaction_id_invalid_amount&#34;, &#34;duration&#34;: &#34;102 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_transaction_API.py::TestUserApi::test_create_transaction_id_invalid_amount&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;102 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Christopher Martin&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;fullerkaren@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;}\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:05 [INFO] test_transaction_API: 94906b53-6051-4a50-b2f8-d683dce9fc66\n2025-10-31 05:48:05 [INFO] test_transaction_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Christopher Martin&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;fullerkaren@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;2962de93-065b-4dd6-a50c-f5585f893ada&amp;#x27;}\n2025-10-31 05:48:05 [INFO] test_transaction_API: 400\n2025-10-31 05:48:05 [INFO] test_transaction_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;Invalid amount&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_transaction_API:test_transaction_API.py:298 94906b53-6051-4a50-b2f8-d683dce9fc66\nINFO     test_transaction_API:test_transaction_API.py:301 {&amp;#x27;name&amp;#x27;: &amp;#x27;Christopher Martin&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;fullerkaren@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;2962de93-065b-4dd6-a50c-f5585f893ada&amp;#x27;}\nINFO     test_transaction_API:test_transaction_API.py:308 400\nINFO     test_transaction_API:test_transaction_API.py:309 {&amp;#x27;error&amp;#x27;: &amp;#x27;Invalid amount&amp;#x27;}\n\n&#34;}], &#34;tests/api/test_transaction_API.py::TestUserApi::test_get_transaction_cross_user_access_check_auth_neg&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_transaction_API.py::TestUserApi::test_get_transaction_cross_user_access_check_auth_neg&#34;, &#34;duration&#34;: &#34;102 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_transaction_API.py::TestUserApi::test_get_transaction_cross_user_access_check_auth_neg&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;102 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:05 [INFO] test_transaction_API:  user1 {&amp;#x27;name&amp;#x27;: &amp;#x27;Keith Jenkins&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;williamslisa@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;} user2 {&amp;#x27;name&amp;#x27;: &amp;#x27;Jason Levy&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;edward73@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;}\n2025-10-31 05:48:05 [INFO] test_transaction_API: 5a17f6de-d5a0-4dbb-956c-9c8d8dfacd4c\n2025-10-31 05:48:05 [INFO] src.utils.ApiMock:  self._transactiondata[data[&amp;#x27;user_id&amp;#x27;]]  [&amp;#x27;dcba2046-8e07-4f49-b4d6-1e190d861a80&amp;#x27;]\n2025-10-31 05:48:05 [INFO] test_transaction_API: 201\n2025-10-31 05:48:05 [INFO] test_transaction_API: {&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;b3003848-d96c-4225-beb0-9493dc389ca7&amp;#x27;, &amp;#x27;amount&amp;#x27;: 305.21, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:05.529485&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;dcba2046-8e07-4f49-b4d6-1e190d861a80&amp;#x27;}\n2025-10-31 05:48:05 [INFO] src.utils.ApiMock: &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\n2025-10-31 05:48:05 [INFO] src.utils.ApiMock: A0001\n2025-10-31 05:48:05 [INFO] test_transaction_API: 401\n2025-10-31 05:48:05 [INFO] test_transaction_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;Unauthorized&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_transaction_API:test_transaction_API.py:325  user1 {&amp;#x27;name&amp;#x27;: &amp;#x27;Keith Jenkins&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;williamslisa@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;} user2 {&amp;#x27;name&amp;#x27;: &amp;#x27;Jason Levy&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;edward73@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;}\nINFO     test_transaction_API:test_transaction_API.py:329 5a17f6de-d5a0-4dbb-956c-9c8d8dfacd4c\nINFO     src.utils.ApiMock:ApiMock.py:69  self._transactiondata[data[&amp;#x27;user_id&amp;#x27;]]  [&amp;#x27;dcba2046-8e07-4f49-b4d6-1e190d861a80&amp;#x27;]\nINFO     test_transaction_API:test_transaction_API.py:335 201\nINFO     test_transaction_API:test_transaction_API.py:336 {&amp;#x27;user_id&amp;#x27;: &amp;#x27;A0001&amp;#x27;, &amp;#x27;recipient_id&amp;#x27;: &amp;#x27;b3003848-d96c-4225-beb0-9493dc389ca7&amp;#x27;, &amp;#x27;amount&amp;#x27;: 305.21, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;timestamp&amp;#x27;: &amp;#x27;2025-10-31T05:48:05.529485&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;dcba2046-8e07-4f49-b4d6-1e190d861a80&amp;#x27;}\nINFO     src.utils.ApiMock:ApiMock.py:88 &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\nINFO     src.utils.ApiMock:ApiMock.py:89 A0001\nINFO     test_transaction_API:test_transaction_API.py:340 401\nINFO     test_transaction_API:test_transaction_API.py:341 {&amp;#x27;error&amp;#x27;: &amp;#x27;Unauthorized&amp;#x27;}\n\n&#34;}], &#34;tests/api/test_user_API.py::TestUserApi::test_get_users_by_id&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_user_API.py::TestUserApi::test_get_users_by_id&#34;, &#34;duration&#34;: &#34;102 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_user_API.py::TestUserApi::test_get_users_by_id&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;102 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Jessica Lester&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;kellyrobert@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;}\nusers_config.json\n/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/resources\n/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/resources/users_config.json\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:05 [INFO] test_user_API: 086ca5d6-aa07-401f-a0a2-20dffa971edf\n2025-10-31 05:48:05 [INFO] test_user_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Jessica Lester&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;kellyrobert@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;a5ba4c6d-85c3-4390-980f-0d3d5b41b24f&amp;#x27;}\n2025-10-31 05:48:05 [INFO] src.utils.ApiMock: &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\n2025-10-31 05:48:05 [INFO] src.utils.ApiMock: A0001\n2025-10-31 05:48:05 [INFO] test_user_API: 200\n2025-10-31 05:48:05 [INFO] test_user_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Jessica Lester&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;kellyrobert@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;a5ba4c6d-85c3-4390-980f-0d3d5b41b24f&amp;#x27;}\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: name\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: email\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: accountType\n\n------------------------------ Captured log call -------------------------------\nINFO     test_user_API:test_user_API.py:39 086ca5d6-aa07-401f-a0a2-20dffa971edf\nINFO     test_user_API:test_user_API.py:41 {&amp;#x27;name&amp;#x27;: &amp;#x27;Jessica Lester&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;kellyrobert@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;a5ba4c6d-85c3-4390-980f-0d3d5b41b24f&amp;#x27;}\nINFO     src.utils.ApiMock:ApiMock.py:88 &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\nINFO     src.utils.ApiMock:ApiMock.py:89 A0001\nINFO     test_user_API:test_user_API.py:44 200\nINFO     test_user_API:test_user_API.py:45 {&amp;#x27;name&amp;#x27;: &amp;#x27;Jessica Lester&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;kellyrobert@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;a5ba4c6d-85c3-4390-980f-0d3d5b41b24f&amp;#x27;}\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:65 &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:66 &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 name\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 email\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 accountType\n\n&#34;}], &#34;tests/api/test_user_API.py::TestUserApi::test_create_users&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_user_API.py::TestUserApi::test_create_users&#34;, &#34;duration&#34;: &#34;102 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_user_API.py::TestUserApi::test_create_users&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;102 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Amy Fernandez&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;adamcarter@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;}\nusers_config.json\n/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/resources\n/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/resources/users_config.json\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:05 [INFO] test_user_API: 1676a632-0046-42a9-be87-f30519b61e59\n2025-10-31 05:48:05 [INFO] test_user_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Amy Fernandez&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;adamcarter@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;2cf8872c-2135-4a01-9226-728a78b29640&amp;#x27;}\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: name\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: email\n2025-10-31 05:48:05 [INFO] src.utils.DataAccessCompare: accountType\n2025-10-31 05:48:05 [INFO] test_user_API: {}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_user_API:test_user_API.py:65 1676a632-0046-42a9-be87-f30519b61e59\nINFO     test_user_API:test_user_API.py:67 {&amp;#x27;name&amp;#x27;: &amp;#x27;Amy Fernandez&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;adamcarter@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;2cf8872c-2135-4a01-9226-728a78b29640&amp;#x27;}\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:65 &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:66 &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 name\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 email\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 accountType\nINFO     test_user_API:test_user_API.py:79 {}\n\n&#34;}], &#34;tests/api/test_user_API.py::TestUserApi::test_create_users_authentication_invalidtoken&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_user_API.py::TestUserApi::test_create_users_authentication_invalidtoken&#34;, &#34;duration&#34;: &#34;102 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_user_API.py::TestUserApi::test_create_users_authentication_invalidtoken&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;102 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Andrew Allen&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;sierra83@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;}\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:05 [INFO] test_user_API: 1b724cca-7e3b-44f8-be80-e97153951649\n2025-10-31 05:48:05 [INFO] test_user_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;Unauthorized&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_user_API:test_user_API.py:90 1b724cca-7e3b-44f8-be80-e97153951649\nINFO     test_user_API:test_user_API.py:92 {&amp;#x27;error&amp;#x27;: &amp;#x27;Unauthorized&amp;#x27;}\n\n&#34;}], &#34;tests/api/test_user_API.py::TestUserApi::test_get_users_not_exists&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_user_API.py::TestUserApi::test_get_users_not_exists&#34;, &#34;duration&#34;: &#34;101 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_user_API.py::TestUserApi::test_get_users_not_exists&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;101 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Michael Day&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;patriciagriffin@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;}\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:05 [INFO] test_user_API: aac190c4-2ae1-4cfd-8c52-f3ab7782f7a7\n2025-10-31 05:48:05 [INFO] test_user_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Michael Day&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;patriciagriffin@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;5df19d92-fba5-4037-98fb-b9891e41c405&amp;#x27;}\n2025-10-31 05:48:05 [INFO] src.utils.ApiMock: &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\n2025-10-31 05:48:05 [INFO] src.utils.ApiMock: A0001\n2025-10-31 05:48:05 [INFO] test_user_API: 404\n2025-10-31 05:48:05 [INFO] test_user_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;users not found&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_user_API:test_user_API.py:112 aac190c4-2ae1-4cfd-8c52-f3ab7782f7a7\nINFO     test_user_API:test_user_API.py:114 {&amp;#x27;name&amp;#x27;: &amp;#x27;Michael Day&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;patriciagriffin@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;5df19d92-fba5-4037-98fb-b9891e41c405&amp;#x27;}\nINFO     src.utils.ApiMock:ApiMock.py:88 &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\nINFO     src.utils.ApiMock:ApiMock.py:89 A0001\nINFO     test_user_API:test_user_API.py:117 404\nINFO     test_user_API:test_user_API.py:118 {&amp;#x27;error&amp;#x27;: &amp;#x27;users not found&amp;#x27;}\n\n&#34;}], &#34;tests/api/test_user_API.py::TestUserApi::test_auth_users_insuffient_permission&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_user_API.py::TestUserApi::test_auth_users_insuffient_permission&#34;, &#34;duration&#34;: &#34;102 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_user_API.py::TestUserApi::test_auth_users_insuffient_permission&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;102 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Karina Small&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;ggomez@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;}\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:06 [INFO] test_user_API: 04c7d649-1f57-48e1-92cc-efbbd7ee669a\n2025-10-31 05:48:06 [INFO] test_user_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Karina Small&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;ggomez@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;20169194-475f-4cb2-ba3a-cb8b34c230b4&amp;#x27;}\n2025-10-31 05:48:06 [INFO] test_user_API: 403\n2025-10-31 05:48:06 [INFO] test_user_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;Access denied&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_user_API:test_user_API.py:146 04c7d649-1f57-48e1-92cc-efbbd7ee669a\nINFO     test_user_API:test_user_API.py:148 {&amp;#x27;name&amp;#x27;: &amp;#x27;Karina Small&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;ggomez@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;20169194-475f-4cb2-ba3a-cb8b34c230b4&amp;#x27;}\nINFO     test_user_API:test_user_API.py:151 403\nINFO     test_user_API:test_user_API.py:152 {&amp;#x27;error&amp;#x27;: &amp;#x27;Access denied&amp;#x27;}\n\n&#34;}], &#34;tests/api/test_user_API.py::TestUserApi::test_user_detail_data_validation&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_user_API.py::TestUserApi::test_user_detail_data_validation&#34;, &#34;duration&#34;: &#34;101 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_user_API.py::TestUserApi::test_user_detail_data_validation&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;101 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;John Lewis&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;wileykimberly@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;}\nusers_config.json\n/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/resources\n/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/resources/users_config.json\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:06 [INFO] test_user_API: c640711e-56fe-47dd-805b-e805532176bc\n2025-10-31 05:48:06 [INFO] test_user_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;John Lewis&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;wileykimberly@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;97b4504e-cafb-40c5-b143-2ff54edf2316&amp;#x27;}\n2025-10-31 05:48:06 [INFO] src.utils.ApiMock: &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\n2025-10-31 05:48:06 [INFO] src.utils.ApiMock: A0001\n2025-10-31 05:48:06 [INFO] test_user_API: 200\n2025-10-31 05:48:06 [INFO] test_user_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;John Lewis&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;wileykimberly@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;97b4504e-cafb-40c5-b143-2ff54edf2316&amp;#x27;}\n2025-10-31 05:48:06 [INFO] src.utils.DataAccessCompare: &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\n2025-10-31 05:48:06 [INFO] src.utils.DataAccessCompare: &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\n2025-10-31 05:48:06 [INFO] src.utils.DataAccessCompare: name\n2025-10-31 05:48:06 [INFO] src.utils.DataAccessCompare: email\n2025-10-31 05:48:06 [INFO] src.utils.DataAccessCompare: accountType\n\n------------------------------ Captured log call -------------------------------\nINFO     test_user_API:test_user_API.py:171 c640711e-56fe-47dd-805b-e805532176bc\nINFO     test_user_API:test_user_API.py:173 {&amp;#x27;name&amp;#x27;: &amp;#x27;John Lewis&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;wileykimberly@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;97b4504e-cafb-40c5-b143-2ff54edf2316&amp;#x27;}\nINFO     src.utils.ApiMock:ApiMock.py:88 &amp;lt;class &amp;#x27;method&amp;#x27;&amp;gt;\nINFO     src.utils.ApiMock:ApiMock.py:89 A0001\nINFO     test_user_API:test_user_API.py:176 200\nINFO     test_user_API:test_user_API.py:177 {&amp;#x27;name&amp;#x27;: &amp;#x27;John Lewis&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;wileykimberly@example.com&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;97b4504e-cafb-40c5-b143-2ff54edf2316&amp;#x27;}\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:65 &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:66 &amp;lt;class &amp;#x27;dict&amp;#x27;&amp;gt;\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 name\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 email\nINFO     src.utils.DataAccessCompare:DataAccessCompare.py:80 accountType\n\n&#34;}], &#34;tests/api/test_user_API.py::TestUserApi::test_create_user_empty_name&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_user_API.py::TestUserApi::test_create_user_empty_name&#34;, &#34;duration&#34;: &#34;101 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_user_API.py::TestUserApi::test_create_user_empty_name&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;101 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;John Vasquez&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;adam76@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;basic&amp;#x27;}\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:06 [INFO] test_user_API: d5867013-f61a-4a02-b225-e99ae3646e6f\n2025-10-31 05:48:06 [INFO] test_user_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;Missing field&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_user_API:test_user_API.py:197 d5867013-f61a-4a02-b225-e99ae3646e6f\nINFO     test_user_API:test_user_API.py:200 {&amp;#x27;error&amp;#x27;: &amp;#x27;Missing field&amp;#x27;}\n\n&#34;}], &#34;tests/api/test_user_API.py::TestUserApi::test_create_user_invalid_email&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_user_API.py::TestUserApi::test_create_user_invalid_email&#34;, &#34;duration&#34;: &#34;101 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_user_API.py::TestUserApi::test_create_user_invalid_email&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;101 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Michelle Jennings&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;jonathanstewart@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;}\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:06 [INFO] test_user_API: 5b7dc45f-6c50-47b9-8e76-11da77d17716\n2025-10-31 05:48:06 [INFO] test_user_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;Missing field&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_user_API:test_user_API.py:218 5b7dc45f-6c50-47b9-8e76-11da77d17716\nINFO     test_user_API:test_user_API.py:221 {&amp;#x27;error&amp;#x27;: &amp;#x27;Missing field&amp;#x27;}\n\n&#34;}], &#34;tests/api/test_user_API.py::TestUserApi::test_get_users_server_error&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/api/test_user_API.py::TestUserApi::test_get_users_server_error&#34;, &#34;duration&#34;: &#34;102 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/api/test_user_API.py::TestUserApi::test_get_users_server_error&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;102 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\ndatastore.get(&amp;#x27;mock_api&amp;#x27;) =&amp;gt; True \n{&amp;#x27;name&amp;#x27;: &amp;#x27;Juan Patterson&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;michaelhansen@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;}\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:06 [INFO] test_user_API: 05f518f9-b22e-426f-b425-94aebd497f46\n2025-10-31 05:48:06 [INFO] test_user_API: {&amp;#x27;name&amp;#x27;: &amp;#x27;Juan Patterson&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;michaelhansen@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;1cce8ce7-1bfb-4e53-89b8-adc9b0b218ee&amp;#x27;}\n2025-10-31 05:48:06 [INFO] test_user_API: 500\n2025-10-31 05:48:06 [INFO] test_user_API: {&amp;#x27;error&amp;#x27;: &amp;#x27;Internal server error&amp;#x27;}\n\n------------------------------ Captured log call -------------------------------\nINFO     test_user_API:test_user_API.py:241 05f518f9-b22e-426f-b425-94aebd497f46\nINFO     test_user_API:test_user_API.py:243 {&amp;#x27;name&amp;#x27;: &amp;#x27;Juan Patterson&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;michaelhansen@example.org&amp;#x27;, &amp;#x27;accountType&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;id&amp;#x27;: &amp;#x27;1cce8ce7-1bfb-4e53-89b8-adc9b0b218ee&amp;#x27;}\nINFO     test_user_API:test_user_API.py:246 500\nINFO     test_user_API:test_user_API.py:247 {&amp;#x27;error&amp;#x27;: &amp;#x27;Internal server error&amp;#x27;}\n\n&#34;}], &#34;tests/ui/transcation_creation_test.py::TestTransactionCreation::test_transaction_creation[trans0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/ui/transcation_creation_test.py::TestTransactionCreation::test_transaction_creation[trans0]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/ui/transcation_creation_test.py::TestTransactionCreation::test_transaction_creation[trans0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\n ******baseurl =&amp;gt; {&amp;#x27;WEB_BASE_URL&amp;#x27;: &amp;#x27;http://localhost:8000/&amp;#x27;, &amp;#x27;API_GATEWAY_URL&amp;#x27;: &amp;#x27;https://qa-mock-gateway.example.com&amp;#x27;, &amp;#x27;USER_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-user.example.com&amp;#x27;, &amp;#x27;TRANSACTION_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-transaction.example.com&amp;#x27;, &amp;#x27;HEADLESS&amp;#x27;: &amp;#x27;True&amp;#x27;} http://localhost:8000/\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:06 [INFO] transcation_creation_test: transaction =&amp;gt; {&amp;#x27;userid&amp;#x27;: &amp;#x27;12345&amp;#x27;, &amp;#x27;recipientId&amp;#x27;: &amp;#x27;6789&amp;#x27;, &amp;#x27;amount&amp;#x27;: &amp;#x27;1000&amp;#x27;, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;Transaction created successfully! [User: ${userId} \u2192 Recipient: ${recipientId}, $${amount}]&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}\n2025-10-31 05:48:06 [INFO] transcation_creation_test: value after rounding =&amp;gt; 1000.00\n2025-10-31 05:48:06 [INFO] transcation_creation_test: from locater=&amp;gt; &amp;lt;Locator frame=&amp;lt;Frame name= url=&amp;#x27;http://localhost:8000/transaction_creation.html&amp;#x27;&amp;gt; selector=&amp;#x27;#message&amp;#x27;&amp;gt;\n2025-10-31 05:48:06 [INFO] transcation_creation_test: expected_string =&amp;gt;Transaction created successfully! [User: 12345 \u2192 Recipient: 6789, $1000.00]\n\n------------------------------ Captured log call -------------------------------\nINFO     transcation_creation_test:transcation_creation_test.py:24 transaction =&amp;gt; {&amp;#x27;userid&amp;#x27;: &amp;#x27;12345&amp;#x27;, &amp;#x27;recipientId&amp;#x27;: &amp;#x27;6789&amp;#x27;, &amp;#x27;amount&amp;#x27;: &amp;#x27;1000&amp;#x27;, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;Transaction created successfully! [User: ${userId} \u2192 Recipient: ${recipientId}, $${amount}]&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}\nINFO     transcation_creation_test:transcation_creation_test.py:26 value after rounding =&amp;gt; 1000.00\nINFO     transcation_creation_test:transcation_creation_test.py:28 from locater=&amp;gt; &amp;lt;Locator frame=&amp;lt;Frame name= url=&amp;#x27;http://localhost:8000/transaction_creation.html&amp;#x27;&amp;gt; selector=&amp;#x27;#message&amp;#x27;&amp;gt;\nINFO     transcation_creation_test:transcation_creation_test.py:29 expected_string =&amp;gt;Transaction created successfully! [User: 12345 \u2192 Recipient: 6789, $1000.00]\n\n&#34;}], &#34;tests/ui/transcation_creation_test.py::TestTransactionCreation::test_transaction_creation_error[trans0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/ui/transcation_creation_test.py::TestTransactionCreation::test_transaction_creation_error[trans0]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/ui/transcation_creation_test.py::TestTransactionCreation::test_transaction_creation_error[trans0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;tests/ui/transcation_creation_test.py:39: in test_transaction_creation_error\n    expect(self.transaction_creation.get_message_locator()).to_have_text(trans[&amp;#x27;expected&amp;#x27;][&amp;#x27;ui&amp;#x27;])\nE   AssertionError: Locator expected to have text &amp;#x27;All fields are required and amount must be positive!&amp;#x27;\nE   Actual value:  \nE   Call log:\nE   LocatorAssertions.to_have_text with timeout 5000ms\nE     - waiting for locator(&amp;quot;#message&amp;quot;)\nE     -   locator resolved to &amp;lt;div id=&amp;quot;message&amp;quot; class=&amp;quot;hidden&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;\nE     -   unexpected value &amp;quot;&amp;quot;\nE     -   locator resolved to &amp;lt;div id=&amp;quot;message&amp;quot; class=&amp;quot;hidden&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;\nE     -   unexpected value &amp;quot;&amp;quot;\nE     -   locator resolved to &amp;lt;div id=&amp;quot;message&amp;quot; class=&amp;quot;hidden&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;\nE     -   unexpected value &amp;quot;&amp;quot;\nE     -   locator resolved to &amp;lt;div id=&amp;quot;message&amp;quot; class=&amp;quot;hidden&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;\nE     -   unexpected value &amp;quot;&amp;quot;\nE     -   locator resolved to &amp;lt;div id=&amp;quot;message&amp;quot; class=&amp;quot;hidden&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;\nE     -   unexpected value &amp;quot;&amp;quot;\nE     -   locator resolved to &amp;lt;div id=&amp;quot;message&amp;quot; class=&amp;quot;hidden&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;\nE     -   unexpected value &amp;quot;&amp;quot;\nE     -   locator resolved to &amp;lt;div id=&amp;quot;message&amp;quot; class=&amp;quot;hidden&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;\nE     -   unexpected value &amp;quot;&amp;quot;\nE     -   locator resolved to &amp;lt;div id=&amp;quot;message&amp;quot; class=&amp;quot;hidden&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;\nE     -   unexpected value &amp;quot;&amp;quot;\nE     -   locator resolved to &amp;lt;div id=&amp;quot;message&amp;quot; class=&amp;quot;hidden&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;\nE     -   unexpected value &amp;quot;&amp;quot;\n\n------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\n ******baseurl =&amp;gt; {&amp;#x27;WEB_BASE_URL&amp;#x27;: &amp;#x27;http://localhost:8000/&amp;#x27;, &amp;#x27;API_GATEWAY_URL&amp;#x27;: &amp;#x27;https://qa-mock-gateway.example.com&amp;#x27;, &amp;#x27;USER_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-user.example.com&amp;#x27;, &amp;#x27;TRANSACTION_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-transaction.example.com&amp;#x27;, &amp;#x27;HEADLESS&amp;#x27;: &amp;#x27;True&amp;#x27;} http://localhost:8000/\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:07 [INFO] transcation_creation_test: transaction =&amp;gt; {&amp;#x27;userid&amp;#x27;: &amp;#x27;12345&amp;#x27;, &amp;#x27;recipientId&amp;#x27;: &amp;#x27;6789&amp;#x27;, &amp;#x27;amount&amp;#x27;: &amp;#x27;-1000&amp;#x27;, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;All fields are required and amount must be positive!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}\n\n------------------------------ Captured log call -------------------------------\nINFO     transcation_creation_test:transcation_creation_test.py:37 transaction =&amp;gt; {&amp;#x27;userid&amp;#x27;: &amp;#x27;12345&amp;#x27;, &amp;#x27;recipientId&amp;#x27;: &amp;#x27;6789&amp;#x27;, &amp;#x27;amount&amp;#x27;: &amp;#x27;-1000&amp;#x27;, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;All fields are required and amount must be positive!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}\n\n--------------------------- Captured stderr teardown ---------------------------\n2025-10-31 05:48:13 [ERROR] conftest: [SCREENSHOT CAPTURED] \u001b]8;;file:///Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/reports/screenshots/test_transaction_creation_error[trans0]_20251031_054813.png\u001b\\/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/reports/screenshots/test_transaction_creation_error[trans0]_20251031_054813.png\u001b]8;;\u001b\\\n\n---------------------------- Captured log teardown -----------------------------\nERROR    conftest:conftest.py:83 [SCREENSHOT CAPTURED] \u001b]8;;file:///Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/reports/screenshots/test_transaction_creation_error[trans0]_20251031_054813.png\u001b\\/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/reports/screenshots/test_transaction_creation_error[trans0]_20251031_054813.png\u001b]8;;\u001b\\&#34;}], &#34;tests/ui/transcation_creation_test.py::TestTransactionCreation::test_transaction_creation_error[trans1]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/ui/transcation_creation_test.py::TestTransactionCreation::test_transaction_creation_error[trans1]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/ui/transcation_creation_test.py::TestTransactionCreation::test_transaction_creation_error[trans1]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\n ******baseurl =&amp;gt; {&amp;#x27;WEB_BASE_URL&amp;#x27;: &amp;#x27;http://localhost:8000/&amp;#x27;, &amp;#x27;API_GATEWAY_URL&amp;#x27;: &amp;#x27;https://qa-mock-gateway.example.com&amp;#x27;, &amp;#x27;USER_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-user.example.com&amp;#x27;, &amp;#x27;TRANSACTION_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-transaction.example.com&amp;#x27;, &amp;#x27;HEADLESS&amp;#x27;: &amp;#x27;True&amp;#x27;} http://localhost:8000/\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:13 [INFO] transcation_creation_test: transaction =&amp;gt; {&amp;#x27;userid&amp;#x27;: &amp;#x27;12345&amp;#x27;, &amp;#x27;recipientId&amp;#x27;: &amp;#x27;12345&amp;#x27;, &amp;#x27;amount&amp;#x27;: &amp;#x27;1000&amp;#x27;, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;Cannot transfer to the same user!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}\n\n------------------------------ Captured log call -------------------------------\nINFO     transcation_creation_test:transcation_creation_test.py:37 transaction =&amp;gt; {&amp;#x27;userid&amp;#x27;: &amp;#x27;12345&amp;#x27;, &amp;#x27;recipientId&amp;#x27;: &amp;#x27;12345&amp;#x27;, &amp;#x27;amount&amp;#x27;: &amp;#x27;1000&amp;#x27;, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;Cannot transfer to the same user!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}\n\n&#34;}], &#34;tests/ui/transcation_creation_test.py::TestTransactionCreation::test_transaction_creation_error[trans2]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/ui/transcation_creation_test.py::TestTransactionCreation::test_transaction_creation_error[trans2]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/ui/transcation_creation_test.py::TestTransactionCreation::test_transaction_creation_error[trans2]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\n ******baseurl =&amp;gt; {&amp;#x27;WEB_BASE_URL&amp;#x27;: &amp;#x27;http://localhost:8000/&amp;#x27;, &amp;#x27;API_GATEWAY_URL&amp;#x27;: &amp;#x27;https://qa-mock-gateway.example.com&amp;#x27;, &amp;#x27;USER_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-user.example.com&amp;#x27;, &amp;#x27;TRANSACTION_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-transaction.example.com&amp;#x27;, &amp;#x27;HEADLESS&amp;#x27;: &amp;#x27;True&amp;#x27;} http://localhost:8000/\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:14 [INFO] transcation_creation_test: transaction =&amp;gt; {&amp;#x27;userid&amp;#x27;: &amp;#x27;12345&amp;#x27;, &amp;#x27;recipientId&amp;#x27;: &amp;#x27;6789&amp;#x27;, &amp;#x27;amount&amp;#x27;: &amp;#x27;10001&amp;#x27;, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;Amount exceeds transfer limit!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}\n\n------------------------------ Captured log call -------------------------------\nINFO     transcation_creation_test:transcation_creation_test.py:37 transaction =&amp;gt; {&amp;#x27;userid&amp;#x27;: &amp;#x27;12345&amp;#x27;, &amp;#x27;recipientId&amp;#x27;: &amp;#x27;6789&amp;#x27;, &amp;#x27;amount&amp;#x27;: &amp;#x27;10001&amp;#x27;, &amp;#x27;type&amp;#x27;: &amp;#x27;transfer&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;Amount exceeds transfer limit!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}\n\n&#34;}], &#34;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation[users0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation[users0]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation[users0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stdout setup -----------------------------\n[{&amp;#x27;username&amp;#x27;: &amp;#x27;user premimum name {id}&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;userp{id}@example.com&amp;#x27;, &amp;#x27;accounttype&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Valid user premium&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;User created successfully!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}, {&amp;#x27;username&amp;#x27;: &amp;#x27;user basic name {id}&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;userb{id}@example.com&amp;#x27;, &amp;#x27;accounttype&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Valid user basic&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;User created successfully!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}]\n\n------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\n ******baseurl =&amp;gt; {&amp;#x27;WEB_BASE_URL&amp;#x27;: &amp;#x27;http://localhost:8000/&amp;#x27;, &amp;#x27;API_GATEWAY_URL&amp;#x27;: &amp;#x27;https://qa-mock-gateway.example.com&amp;#x27;, &amp;#x27;USER_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-user.example.com&amp;#x27;, &amp;#x27;TRANSACTION_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-transaction.example.com&amp;#x27;, &amp;#x27;HEADLESS&amp;#x27;: &amp;#x27;True&amp;#x27;} http://localhost:8000/\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:15 [INFO] user_creation_test: users[&amp;#x27;username&amp;#x27;] user premimum name {id}, users[&amp;#x27;email&amp;#x27;] userp{id}@example.com, users[&amp;#x27;accounttype&amp;#x27;] premium\n\n------------------------------ Captured log call -------------------------------\nINFO     user_creation_test:user_creation_test.py:23 users[&amp;#x27;username&amp;#x27;] user premimum name {id}, users[&amp;#x27;email&amp;#x27;] userp{id}@example.com, users[&amp;#x27;accounttype&amp;#x27;] premium\n\n&#34;}], &#34;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation[users1]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation[users1]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation[users1]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stdout setup -----------------------------\n[{&amp;#x27;username&amp;#x27;: &amp;#x27;user premimum name {id}&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;userp{id}@example.com&amp;#x27;, &amp;#x27;accounttype&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Valid user premium&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;User created successfully!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}, {&amp;#x27;username&amp;#x27;: &amp;#x27;user basic name {id}&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;userb{id}@example.com&amp;#x27;, &amp;#x27;accounttype&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Valid user basic&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;User created successfully!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}]\n\n------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\n ******baseurl =&amp;gt; {&amp;#x27;WEB_BASE_URL&amp;#x27;: &amp;#x27;http://localhost:8000/&amp;#x27;, &amp;#x27;API_GATEWAY_URL&amp;#x27;: &amp;#x27;https://qa-mock-gateway.example.com&amp;#x27;, &amp;#x27;USER_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-user.example.com&amp;#x27;, &amp;#x27;TRANSACTION_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-transaction.example.com&amp;#x27;, &amp;#x27;HEADLESS&amp;#x27;: &amp;#x27;True&amp;#x27;} http://localhost:8000/\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:16 [INFO] user_creation_test: users[&amp;#x27;username&amp;#x27;] user basic name {id}, users[&amp;#x27;email&amp;#x27;] userb{id}@example.com, users[&amp;#x27;accounttype&amp;#x27;] basic\n\n------------------------------ Captured log call -------------------------------\nINFO     user_creation_test:user_creation_test.py:23 users[&amp;#x27;username&amp;#x27;] user basic name {id}, users[&amp;#x27;email&amp;#x27;] userb{id}@example.com, users[&amp;#x27;accounttype&amp;#x27;] basic\n\n&#34;}], &#34;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation_error[users0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation_error[users0]&#34;, &#34;duration&#34;: &#34;398 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation_error[users0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;398 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;tests/ui/user_creation_test.py:37: in test_user_creation_error\n    expect(self.user_creation.get_toast_message(users[&amp;#x27;expected&amp;#x27;][&amp;#x27;message&amp;#x27;])).to_have_text(users[&amp;#x27;expected&amp;#x27;][&amp;#x27;ui&amp;#x27;])\n.venv/lib/python3.9/site-packages/playwright/sync_api/__init__.py:142: in __call__\n    raise ValueError(f&amp;quot;Unsupported type: {type(actual)}&amp;quot;)\nE   ValueError: Unsupported type: &amp;lt;class &amp;#x27;str&amp;#x27;&amp;gt;\n\n---------------------------- Captured stdout setup -----------------------------\n[{&amp;#x27;username&amp;#x27;: &amp;#x27;user premimum name {id}&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;userp{id}@example.com&amp;#x27;, &amp;#x27;accounttype&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Valid user premium&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;User created successfully!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}, {&amp;#x27;username&amp;#x27;: &amp;#x27;user basic name {id}&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;userb{id}@example.com&amp;#x27;, &amp;#x27;accounttype&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Valid user basic&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;User created successfully!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}]\n\n------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\n ******baseurl =&amp;gt; {&amp;#x27;WEB_BASE_URL&amp;#x27;: &amp;#x27;http://localhost:8000/&amp;#x27;, &amp;#x27;API_GATEWAY_URL&amp;#x27;: &amp;#x27;https://qa-mock-gateway.example.com&amp;#x27;, &amp;#x27;USER_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-user.example.com&amp;#x27;, &amp;#x27;TRANSACTION_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-transaction.example.com&amp;#x27;, &amp;#x27;HEADLESS&amp;#x27;: &amp;#x27;True&amp;#x27;} http://localhost:8000/\n users =&amp;gt; name\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:18 [INFO] user_creation_test: users[&amp;#x27;username&amp;#x27;] , users[&amp;#x27;email&amp;#x27;] userp{id}@test.com, users[&amp;#x27;accounttype&amp;#x27;] premium\n\n------------------------------ Captured log call -------------------------------\nINFO     user_creation_test:user_creation_test.py:31 users[&amp;#x27;username&amp;#x27;] , users[&amp;#x27;email&amp;#x27;] userp{id}@test.com, users[&amp;#x27;accounttype&amp;#x27;] premium\n\n--------------------------- Captured stderr teardown ---------------------------\n2025-10-31 05:48:18 [ERROR] conftest: [SCREENSHOT CAPTURED] \u001b]8;;file:///Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/reports/screenshots/test_user_creation_error[users0]_20251031_054818.png\u001b\\/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/reports/screenshots/test_user_creation_error[users0]_20251031_054818.png\u001b]8;;\u001b\\\n\n---------------------------- Captured log teardown -----------------------------\nERROR    conftest:conftest.py:83 [SCREENSHOT CAPTURED] \u001b]8;;file:///Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/reports/screenshots/test_user_creation_error[users0]_20251031_054818.png\u001b\\/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/reports/screenshots/test_user_creation_error[users0]_20251031_054818.png\u001b]8;;\u001b\\&#34;}], &#34;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation_error[users1]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation_error[users1]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation_error[users1]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stdout setup -----------------------------\n[{&amp;#x27;username&amp;#x27;: &amp;#x27;user premimum name {id}&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;userp{id}@example.com&amp;#x27;, &amp;#x27;accounttype&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Valid user premium&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;User created successfully!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}, {&amp;#x27;username&amp;#x27;: &amp;#x27;user basic name {id}&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;userb{id}@example.com&amp;#x27;, &amp;#x27;accounttype&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Valid user basic&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;User created successfully!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}]\n\n------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\n ******baseurl =&amp;gt; {&amp;#x27;WEB_BASE_URL&amp;#x27;: &amp;#x27;http://localhost:8000/&amp;#x27;, &amp;#x27;API_GATEWAY_URL&amp;#x27;: &amp;#x27;https://qa-mock-gateway.example.com&amp;#x27;, &amp;#x27;USER_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-user.example.com&amp;#x27;, &amp;#x27;TRANSACTION_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-transaction.example.com&amp;#x27;, &amp;#x27;HEADLESS&amp;#x27;: &amp;#x27;True&amp;#x27;} http://localhost:8000/\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:18 [INFO] user_creation_test: users[&amp;#x27;username&amp;#x27;] user basic name {id}, users[&amp;#x27;email&amp;#x27;] userb{id}@test.com, users[&amp;#x27;accounttype&amp;#x27;] basic\n\n------------------------------ Captured log call -------------------------------\nINFO     user_creation_test:user_creation_test.py:31 users[&amp;#x27;username&amp;#x27;] user basic name {id}, users[&amp;#x27;email&amp;#x27;] userb{id}@test.com, users[&amp;#x27;accounttype&amp;#x27;] basic\n\n&#34;}], &#34;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation_error[users2]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation_error[users2]&#34;, &#34;duration&#34;: &#34;383 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/ui/user_creation_test.py::TestUserCreation::test_user_creation_error[users2]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;383 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;tests/ui/user_creation_test.py:37: in test_user_creation_error\n    expect(self.user_creation.get_toast_message(users[&amp;#x27;expected&amp;#x27;][&amp;#x27;message&amp;#x27;])).to_have_text(users[&amp;#x27;expected&amp;#x27;][&amp;#x27;ui&amp;#x27;])\n.venv/lib/python3.9/site-packages/playwright/sync_api/__init__.py:142: in __call__\n    raise ValueError(f&amp;quot;Unsupported type: {type(actual)}&amp;quot;)\nE   ValueError: Unsupported type: &amp;lt;class &amp;#x27;str&amp;#x27;&amp;gt;\n\n---------------------------- Captured stdout setup -----------------------------\n[{&amp;#x27;username&amp;#x27;: &amp;#x27;user premimum name {id}&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;userp{id}@example.com&amp;#x27;, &amp;#x27;accounttype&amp;#x27;: &amp;#x27;premium&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Valid user premium&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;User created successfully!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}, {&amp;#x27;username&amp;#x27;: &amp;#x27;user basic name {id}&amp;#x27;, &amp;#x27;email&amp;#x27;: &amp;#x27;userb{id}@example.com&amp;#x27;, &amp;#x27;accounttype&amp;#x27;: &amp;#x27;basic&amp;#x27;, &amp;#x27;description&amp;#x27;: &amp;#x27;Valid user basic&amp;#x27;, &amp;#x27;expected&amp;#x27;: {&amp;#x27;ui&amp;#x27;: &amp;#x27;User created successfully!&amp;#x27;, &amp;#x27;message&amp;#x27;: &amp;#x27;True&amp;#x27;, &amp;#x27;api&amp;#x27;: &amp;#x27;200&amp;#x27;}}]\n\n------------------------------ Captured log setup ------------------------------\nDEBUG    asyncio:selector_events.py:59 Using selector: KqueueSelector\n\n----------------------------- Captured stdout call -----------------------------\n ******baseurl =&amp;gt; {&amp;#x27;WEB_BASE_URL&amp;#x27;: &amp;#x27;http://localhost:8000/&amp;#x27;, &amp;#x27;API_GATEWAY_URL&amp;#x27;: &amp;#x27;https://qa-mock-gateway.example.com&amp;#x27;, &amp;#x27;USER_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-user.example.com&amp;#x27;, &amp;#x27;TRANSACTION_SERVICE_URL&amp;#x27;: &amp;#x27;https://qa-mock-transaction.example.com&amp;#x27;, &amp;#x27;HEADLESS&amp;#x27;: &amp;#x27;True&amp;#x27;} http://localhost:8000/\n users =&amp;gt; accounttype\n\n----------------------------- Captured stderr call -----------------------------\n2025-10-31 05:48:19 [INFO] user_creation_test: users[&amp;#x27;username&amp;#x27;] , users[&amp;#x27;email&amp;#x27;] userp{id}@test.com, users[&amp;#x27;accounttype&amp;#x27;] \n\n------------------------------ Captured log call -------------------------------\nINFO     user_creation_test:user_creation_test.py:31 users[&amp;#x27;username&amp;#x27;] , users[&amp;#x27;email&amp;#x27;] userp{id}@test.com, users[&amp;#x27;accounttype&amp;#x27;]\n\n--------------------------- Captured stderr teardown ---------------------------\n2025-10-31 05:48:19 [ERROR] conftest: [SCREENSHOT CAPTURED] \u001b]8;;file:///Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/reports/screenshots/test_user_creation_error[users2]_20251031_054819.png\u001b\\/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/reports/screenshots/test_user_creation_error[users2]_20251031_054819.png\u001b]8;;\u001b\\\n\n---------------------------- Captured log teardown -----------------------------\nERROR    conftest:conftest.py:83 [SCREENSHOT CAPTURED] \u001b]8;;file:///Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/reports/screenshots/test_user_creation_error[users2]_20251031_054819.png\u001b\\/Users/snigdhasivadas/Interview/FloQast/playwright-python-automation/reports/screenshots/test_user_creation_error[users2]_20251031_054819.png\u001b]8;;\u001b\\&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;report.html&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > td')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > td')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+</html>
