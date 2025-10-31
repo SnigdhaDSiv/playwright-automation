@@ -1,16 +1,16 @@
 
-Setup the env
+- Setup the env
+    - cd playwright-python-automation
+    - mv env.qa .env.qa
+    - sh setup_env.sh
 
-cd playwright-python-automation
-sh setup_env.sh
-
-Start the mock frontend server
-cd  playwright-python-automation/mock_frontend
-python -m http.server 8000
+- To start the mock frontend server
+    - cd  playwright-python-automation/mock_frontend
+    - python -m http.server 8000
 
 
-Generate the report and run the tests
-ENV_NAME=qa .venv/bin/pytest tests/ --html=reports/report.html --self-contained-html
+- Generate the report and run the tests
+    - ENV_NAME=qa .venv/bin/pytest tests/ --html=reports/report.html --self-contained-html
 
 
 Framework Should Include:
