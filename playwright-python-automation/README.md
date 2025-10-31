@@ -8,10 +8,8 @@
     - cd  playwright-python-automation/mock_frontend
     - python -m http.server 8000
 
-
 - Generate the report and run the tests
     - ENV_NAME=qa .venv/bin/pytest tests/ --html=reports/report.html --self-contained-html
-
 
 Framework Should Include:
 1. API Test Suite 
