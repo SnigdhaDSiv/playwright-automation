@@ -1,0 +1,23 @@
+  {"mapKey":
+    [{
+      "responsePayload": "user_id",
+      "validatePayload": "user_id",
+      "validation": "content"
+    },
+    {
+      "responsePayload": "amount",
+      "validatePayload": "amount",
+      "validation": "content"
+    },
+    {
+      "responsePayload": "type",
+      "validatePayload": "type",
+      "validation": "content"
+    },
+    {
+      "responsePayload": "recipient_id",
+      "validatePayload": "recipient_id",
+      "validation": "content"
+    }
+  ]}
+

@@ -1,0 +1,54 @@
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.pdb
+
+
+.venv/
+
+
+# Byte-compiled / cache
+*.egg-info/
+.eggs/
+build/
+dist/
+
+
+reports/
+logs/
+coverage/
+htmlcov/
+*.log
+*.tmp
+*.bak
+
+# Pytest cache
+.pytest_cache/
+
+
+playwright-report/
+test-results/
+screenshots/
+trace.zip
+*.har
+*.zip
+*.mp4
+
+
+.env
+.env.*
+!example.env  # Keep template env file for reference
+
+# Local system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+
+*.sqlite3
+*.db

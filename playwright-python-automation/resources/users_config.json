@@ -1,0 +1,19 @@
+
+  {"mapKey":
+    [
+    {
+      "responsePayload": "name",
+      "validatePayload": "name",
+      "validation": "content"
+    },
+    {
+      "responsePayload": "email",
+      "validatePayload": "email",
+      "validation": "content"
+    },
+    {
+      "responsePayload": "accountType",
+      "validatePayload": "accountType",
+      "validation": "content"
+    }
+  ]}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transaction Creation - Mock Frontend</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Transaction Creation</h1>
+
+    <form id="transactionForm">
+      <label for="userId">User ID:</label>
+      <input type="text" id="userId" name="userId" placeholder="Enter your User ID" required />
+
+      <label for="recipientId">Recipient ID:</label>
+      <input type="text" id="recipientId" name="recipientId" placeholder="Enter recipient ID" required />
+
+      <label for="amount">Amount:</label>
+      <input type="number" id="amount" name="amount" placeholder="Enter amount" min="1" required />
+
+      <label for="type">Transaction Type:</label>
+      <select id="type" name="type" required>
+        <option value="transfer" selected>Transfer</option>
+        <option value="deposit">Deposit</option>
+        <option value="withdrawal">Withdrawal</option>
+      </select>
+
+      <button type="submit" id ="create_transaction">Create Transaction</button>
+    </form>
+
+    <div id="message" class="hidden"></div>
+  </div>
+
+  <script src="transaction.js"></script>
+</body>
+</html>
