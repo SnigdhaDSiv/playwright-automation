@@ -17,8 +17,6 @@ build/
 dist/
 
 
-reports/
-logs/
 coverage/
 htmlcov/
 *.log
@@ -38,8 +36,6 @@ trace.zip
 *.mp4
 
 
-.env
-.env.*
 !example.env  # Keep template env file for reference
 
 # Local system files
